@@ -6,12 +6,3 @@ class ParseEK60(ParseEK):
 
     def __init__(self, file, params, storage_options={}, dgram_zarr_vars={}, sonar_model="EK60"):
         super().__init__(file, params, storage_options, dgram_zarr_vars, sonar_model)
-
-    def _select_datagrams(self, params):
-        # Translates user input into specific datagrams or ALL
-        if params == "ALL":
-            return ["ALL"]
-        elif params == "GPS":
-            return ["NME"]
-        else:
-            raise ValueError("Unknown data type", params)
