@@ -50,7 +50,7 @@ def depth_from_pressure(pressure, latitude=30, atm_pres_surf=0):
 
     # Calculate depth
     pressure = pressure - atm_pres_surf
-    depth_w_g = c4 * pressure**4 + c3 * pressure**3 + c2 * pressure**2 + c1 * pressure
+    depth_w_g = c1 * pressure + c2 * pressure**2 + c3 * pressure**3 + c4 * pressure**4
     x = np.sin(np.deg2rad(latitude))
     gravity = g * (1.0 + k1 * x**2 + k2 * x**4) + k3 * pressure
     depth = depth_w_g / gravity
