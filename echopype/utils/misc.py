@@ -1,4 +1,9 @@
+from typing import List, Optional, Tuple, Union
+
 import numpy as np
+from numpy.typing import NDArray
+
+FloatSequence = Union[List[float], Tuple[float], NDArray[float]]
 
 
 def camelcase2snakecase(camel_case_str):
@@ -16,7 +21,11 @@ def camelcase2snakecase(camel_case_str):
     return camel_case_str.lower()
 
 
-def depth_from_pressure(pressure, latitude=30, atm_pres_surf=0):
+def depth_from_pressure(
+    pressure: Union[float, FloatSequence],
+    latitude: Optional[Union[float, FloatSequence]] = 30.0,
+    atm_pres_surf: Optional[Union[float, FloatSequence]] = 0.0,
+) -> NDArray[float]:
     """
     Convert pressure to depth using UNESCO 1983 algorithm.
 
@@ -26,18 +35,36 @@ def depth_from_pressure(pressure, latitude=30, atm_pres_surf=0):
 
     Parameters
     ----------
-    pressure : array_like
+    pressure : Union[float, FloatSequence]
         Pressure in dbar
-    latitude : float
-        Latitude in decimal degrees
-    atm_pres_surf : float
+    latitude : Union[float, FloatSequence], default=30.0
+        Latitude in decimal degrees.
+    atm_pres_surf : Union[float, FloatSequence], default=0.0
         Atmospheric pressure at the surface in dbar
 
     Returns
     -------
-    depth : array_like
+    depth : NDArray[float]
         Depth in meters
     """
+
+    def _as_nparray_check(v, check_vs_pressure=False):
+        """
+        Convert to np.array if not already a np.array.
+        Ensure latitude and atm_pres_surf are of the same size and shape as
+        pressure if they are not scalar.
+        """
+        v_array = np.array(v) if not isinstance(v, np.ndarray) else v
+        if check_vs_pressure:
+            if v_array.size != 1:
+                if v_array.size != pressure.size or v_array.shape != pressure.shape:
+                    raise ValueError("Sequence shape or size does not match pressure")
+        return v_array
+
+    pressure = _as_nparray_check(pressure)
+    latitude = _as_nparray_check(latitude, check_vs_pressure=True)
+    atm_pres_surf = _as_nparray_check(atm_pres_surf, check_vs_pressure=True)
+
     # Constants
     g = 9.780318
     c1 = 9.72659
