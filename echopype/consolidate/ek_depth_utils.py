@@ -33,7 +33,7 @@ def ek_use_platform_vertical_offsets(
 ) -> xr.DataArray:
     """
     Use `water_level`, `vertical_offset` and `transducer_offset_z` from the EK Platform group
-    to compute transducer depth.
+    to compute transducer depth test.
     """
     # Check and log NaNs if they exist in the Platform group variables
     _check_and_log_nans(
