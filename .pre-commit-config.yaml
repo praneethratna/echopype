@@ -2,7 +2,6 @@ exclude: |
   (?x)^(
     echopype/tests/|
     echopype/test_data/|
-    echopype/visualize/|
     docs/source/conf.py
   )
 repos:
