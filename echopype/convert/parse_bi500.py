@@ -5,11 +5,8 @@ from struct import unpack
 import fsspec
 import numpy as np
 
-from ..utils.log import _init_logger
 from ..utils.misc import camelcase2snakecase
 from .parse_base import ParseBase
-
-logger = _init_logger(__name__)
 
 FILENAME_DATETIME_BI500 = (
     "?(?<prefix>.*)?-?F(?P<frequency>\\w+)?-?T(?P<transducer>\\w+)?"
@@ -108,7 +105,6 @@ class ParseBI500(ParseBase):
 
     def _group_file_sets(self, all_files):
         """Group companion files by BI500 frequency/transceiver file set."""
-        logger.info("Found the following files in the folder:")
 
         file_set_map = {}
         acquisition_keys = set()
@@ -128,8 +124,6 @@ class ParseBI500(ParseBase):
             acquisition_keys.add(acquisition_key)
             file_set_map.setdefault(file_set_key, {})
             file_set_map[file_set_key][info["file_type"]] = file_name
-
-            logger.info(f"Found file: {file_name}")
 
         if not file_set_map:
             raise ValueError(

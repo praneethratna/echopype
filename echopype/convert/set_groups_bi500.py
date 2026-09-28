@@ -6,15 +6,10 @@ import numpy as np
 import xarray as xr
 
 from ..utils.coding import set_time_encodings
-from ..utils.log import _init_logger
 from ..utils.prov import echopype_prov_attrs, source_files_vars
-
-# fmt: off
 from .set_groups_base import SetGroupsBase
 
 # fmt: on
-
-logger = _init_logger(__name__)
 
 
 class SetGroupsBI500(SetGroupsBase):
