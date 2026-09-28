@@ -13,13 +13,8 @@ API components that most users will interact with.
 EchoData class
 --------------
 
-.. didn't yield expected results (no better than automodapi) AND hid the open_ functions!
-   .. autoclass:: echopype.echodata
-      :members:
-
-.. automodapi:: echopype.echodata
-   :no-inheritance-diagram:
-   :no-heading:
+.. automodule:: echopype.echodata
+   :members:
 
 Open raw and converted files
 ----------------------------
@@ -27,16 +22,7 @@ Open raw and converted files
 .. _api-open_raw:
 
 .. automodule:: echopype
-   :members: open_raw
-
-.. automodule:: echopype
-   :members: open_converted
-
-Combine EchoData objects
-------------------------
-
-.. automodule:: echopype
-   :members: combine_echodata
+   :members: open_raw, open_converted, combine_echodata
 
 Data processing subpackages
 ---------------------------
@@ -44,57 +30,56 @@ Data processing subpackages
 calibrate
 ^^^^^^^^^
 
-.. automodapi:: echopype.calibrate
-   :no-inheritance-diagram:
-   :no-heading:
+.. automodule:: echopype.calibrate
+   :members:
 
 clean
 ^^^^^
 
-.. automodapi:: echopype.clean
-   :no-inheritance-diagram:
-   :no-heading:
+.. automodule:: echopype.clean
+   :members:
 
 commongrid
 ^^^^^^^^^^
 
-.. automodapi:: echopype.commongrid
-   :no-inheritance-diagram:
-   :no-heading:
+.. automodule:: echopype.commongrid
+   :members:
 
 consolidate
 ^^^^^^^^^^^
 
-.. automodapi:: echopype.consolidate
-   :no-inheritance-diagram:
-   :no-heading:
-
-qc
-^^^
-
-.. automodapi:: echopype.qc
-   :no-inheritance-diagram:
-   :no-heading:
+.. automodule:: echopype.consolidate
+   :members:
 
 mask
 ^^^^
 
-.. automodapi:: echopype.mask
-   :no-inheritance-diagram:
-   :no-heading:
+.. automodule:: echopype.mask
+   :members:
 
 metrics
 ^^^^^^^
 
-.. automodapi:: echopype.metrics
-   :no-inheritance-diagram:
-   :no-heading:
+.. automodule:: echopype.metrics
+   :members:
 
+qc
+^^^
+
+.. automodule:: echopype.qc
+   :members:
 
 Utilities
 ---------
 
-.. automodapi:: echopype.utils.uwa
-   :no-inheritance-diagram:
-   :no-heading:
-   :members: calc_absorption, calc_sound_speed
+Seawater properties
+^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: echopype.utils.uwa
+   :members:
+
+Colormaps
+^^^^^^^^^
+
+.. automodule:: echopype.colormap
+   :members:
