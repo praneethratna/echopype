@@ -312,7 +312,7 @@ class ParseBI500(ParseBase):
 
             frequency = int(parameters["frequency"][0])
             transceiver = int(parameters["transceiver"][0])
-            channel_id = f"BI500-F{frequency}-T{transceiver:02d}"
+            channel_id = f"F{frequency}-T{transceiver:02d}"
 
             self.channel_data[channel_id] = {
                 "file_type_map": file_type_map,
