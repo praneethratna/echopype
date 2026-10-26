@@ -332,6 +332,119 @@ def test_compute_Sv_ek80_CW_power_BB_complex(ek80_path):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
+    "file_group, filename, waveform_mode, encode_mode",
+    [
+        ("cal", "2018115-D20181213-T094600.raw", "BB", "complex"),
+        ("cal", "2018115-D20181213-T094600.raw", "CW", "complex"),
+        ("ek80", "D20170912-T234910.raw", "BB", "complex"),
+        ("ek80", "Summer2018--D20180905-T033113.raw", "BB", "complex"),
+        ("ek80", "Summer2018--D20180905-T033113.raw", "CW", "power"),
+        ("ek80", "ar2.0-D20201210-T000409.raw", "CW", "complex"),
+        ("ek80", "saildrone/SD2019_WCS_v05-Phase0-D20190617-T125959-0.raw", "CW", "complex"),
+        ("ek80", "D20200528-T125932.raw", "CW", "complex"),
+    ],
+)
+def test_compute_Sv_ek80_waveform_modes(
+    ek80_cal_path, ek80_path, file_group, filename, waveform_mode, encode_mode
+):
+    """check sv calibration with different ek80 files and waveform modes"""
+
+    root = ek80_cal_path if file_group == "cal" else ek80_path
+    raw_path = root / filename
+
+    ed = ep.open_raw(raw_path, sonar_model="EK80")
+
+    ds_Sv = ep.calibrate.compute_Sv(
+        ed,
+        waveform_mode=waveform_mode,
+        encode_mode=encode_mode,
+    )
+
+    assert isinstance(ds_Sv, xr.Dataset)
+    assert "Sv" in ds_Sv
+    assert ds_Sv["Sv"].size > 0
+
+
+
+@pytest.mark.integration
+def test_compute_Sv_separately_when_ping_time_extends_past_time1(ek80_path, tmp_path):
+    """check environmental variables when calibrating files separately"""
+
+    raw_files = [
+        ek80_path / "pifsc_saildrone/SD_TPOS2023_v03-Phase0-D20230530-T001150-0.raw",
+        ek80_path / "pifsc_saildrone/SD_TPOS2023_v03-Phase0-D20230530-T002350-0.raw",
+    ]
+
+    stores = []
+
+    for idx, raw_file in enumerate(raw_files):
+        ed = ep.open_raw(raw_file, sonar_model="EK80")
+
+        # use fixed values so the test gives the same result each time
+        ed["Environment"]["acidity"].values = [8.0 + idx * 0.01]
+        ed["Environment"]["salinity"].values = [34.5 + idx * 0.1]
+        ed["Environment"]["temperature"].values = [25.5 + idx * 0.1]
+
+        ds = ep.calibrate.compute_Sv(
+            ed, waveform_mode="CW", encode_mode="complex"
+        )
+
+        # check the calibrated dataset and environmental variables
+        assert isinstance(ds, xr.Dataset)
+        assert "Sv" in ds
+        assert "time1" not in ds.coords
+
+        for variable in ("sound_absorption", "temperature", "salinity", "pH"):
+            assert variable in ds
+            assert bool(ds[variable].notnull().all())
+
+        # save each sv dataset separately
+        store = tmp_path / f"Sv_{idx}.zarr"
+        ds.to_zarr(store, mode="w")
+        stores.append(store)
+
+    parts = [xr.open_zarr(path) for path in stores]
+
+    try:
+        # check the ping times before combining
+        for left, right in zip(parts, parts[1:]):
+            assert left.ping_time.max() < right.ping_time.min()
+
+        # combine the calibrated sv datasets
+        combined_Sv = xr.concat(
+            [part[["Sv"]] for part in parts],
+            dim="ping_time",
+        )
+
+        # check the combined dataset
+        assert isinstance(combined_Sv, xr.Dataset)
+        assert "Sv" in combined_Sv
+        assert "time1" not in combined_Sv.coords
+
+        assert combined_Sv.sizes["ping_time"] == sum(
+            part.sizes["ping_time"] for part in parts
+        )
+
+        # make sure each file's sv values are preserved
+        start = 0
+
+        for part in parts:
+            end = start + part.sizes["ping_time"]
+
+            xr.testing.assert_equal(
+                combined_Sv["Sv"].isel(ping_time=slice(start, end)),
+                part["Sv"],
+            )
+
+            start = end
+
+        assert bool(combined_Sv["Sv"].notnull().any())
+
+    finally:
+        for part in parts:
+            part.close()
+
+@pytest.mark.parametrize(
     "raw_path, sonar_model, xml_path, waveform_mode, encode_mode",
     [
         ("17031001.01A", "AZFP", "17030815.XML", None, None),
