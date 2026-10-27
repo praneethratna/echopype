@@ -347,7 +347,11 @@ def test_compute_Sv_ek80_CW_power_BB_complex(ek80_path):
 def test_compute_Sv_ek80_waveform_modes(
     ek80_cal_path, ek80_path, file_group, filename, waveform_mode, encode_mode
 ):
-    """check sv calibration with different ek80 files and waveform modes"""
+    """
+    Test Sv calibration for different EK80 files and waveform modes.
+    Check that CW and BB data can be calibrated with the available
+    power and complex encodings.
+    """
 
     root = ek80_cal_path if file_group == "cal" else ek80_path
     raw_path = root / filename
@@ -368,7 +372,13 @@ def test_compute_Sv_ek80_waveform_modes(
 
 @pytest.mark.integration
 def test_compute_Sv_separately_when_ping_time_extends_past_time1(ek80_path, tmp_path):
-    """check environmental variables when calibrating files separately"""
+    """
+    Test calibration when ping_time extends beyond the environment time1 coordinate.
+    Calibrate each file separately and check that the output has no time1
+    coordinate and no missing environmental values.
+    Combine the resulting Sv datasets and check that ping times and Sv
+    values are preserved.
+    """
 
     raw_files = [
         ek80_path / "pifsc_saildrone/SD_TPOS2023_v03-Phase0-D20230530-T001150-0.raw",

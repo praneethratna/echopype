@@ -1,5 +1,5 @@
 
-"""test combining calibrated sv datasets from multiple files"""
+"""Test combining calibrated Sv datasets from multiple files using Xarray and Zarr"""
 
 import numpy as np
 import pytest
@@ -11,7 +11,7 @@ import echopype as ep
 
 @pytest.fixture
 def sv_parts():
-    """create small sv datasets with increasing ping times"""
+    """Create small synthetic Sv datasets with increasing ping times"""
     parts = []
 
     for i in range(3):
@@ -39,7 +39,7 @@ def sv_parts():
 
 
 def _write_open_combine(parts, tmp_path):
-    """save each dataset to zarr and reopen them together"""
+    """Save individual Sv datasets to Zarr and reopen them as one combined dataset"""
     paths = []
 
     for index, part in enumerate(parts):
@@ -59,7 +59,7 @@ def _write_open_combine(parts, tmp_path):
 
 
 def _save_combined(dataset, path):
-    """rechunk the combined dataset before saving to zarr"""
+    """Clear inherited chunk encoding and rechunk the combined dataset before saving to Zarr"""
     dataset = dataset.drop_encoding()
 
     dataset = dataset.chunk(
@@ -75,7 +75,7 @@ def _save_combined(dataset, path):
 
 @pytest.mark.parametrize("n_parts", [2, 3])
 def test_sv_zarr_multi_file_combination(tmp_path, sv_parts, n_parts):
-    """check combining and saving multiple sv datasets"""
+    """Check that multiple Sv datasets can be combined, saved, and reopened without changing their values"""
     parts = sv_parts[:n_parts]
     expected = xr.concat(parts, dim="ping_time")
 
@@ -91,7 +91,7 @@ def test_sv_zarr_multi_file_combination(tmp_path, sv_parts, n_parts):
 
 
 def test_sv_combine_rejects_incompatible_channels(tmp_path, sv_parts):
-    """check that different channels cannot be combined directly"""
+    """Check that different channels cannot be combined directly"""
     left, right = sv_parts[:2]
     right = right.assign_coords(channel=["other1", "other2"])
 
@@ -101,7 +101,7 @@ def test_sv_combine_rejects_incompatible_channels(tmp_path, sv_parts):
 
 
 def test_sv_channel_subset(tmp_path, sv_parts):
-    """check combining datasets with shared channels"""
+    """Check combining datasets with shared channels"""
     left, right = sv_parts[:2]
     right = right.assign_coords(channel=["ch1", "other"])
 
@@ -124,7 +124,7 @@ def test_sv_channel_subset(tmp_path, sv_parts):
 
 
 def test_sv_different_range_sample_lengths(tmp_path, sv_parts):
-    """check combining datasets with different sample lengths"""
+    """Check combining datasets with different sample lengths"""
     left, right = sv_parts[:2]
     right = right.isel(range_sample=slice(None, 2))
 
@@ -236,7 +236,7 @@ def test_sv_different_range_sample_lengths(tmp_path, sv_parts):
     ]
 )
 def raw_sv_case(request, test_path):
-    """use raw files from the old echodata combination tests"""
+    """Reuse EK60, EK80, and AZFP raw files from the original EchoData combination tests"""
     key, sonar_model, names, xml, waveform_mode, encode_mode = request.param
 
     root = test_path[key]
@@ -247,7 +247,7 @@ def raw_sv_case(request, test_path):
 
 
 def _cw_encoding(echodata):
-    """find the cw encoding used by the file"""
+    """Find the CW encoding used by the file"""
     descriptions = echodata["Sonar"]["waveform_encode_descr"].values.tolist()
 
     if "complex_CW" in descriptions:
@@ -256,12 +256,12 @@ def _cw_encoding(echodata):
     if "power" in descriptions:
         return "power"
 
-    pytest.fail(f"expected cw data but found {descriptions}")
+    pytest.fail(f"expected CW data but found {descriptions}")
 
 
 @pytest.mark.integration
 def test_real_instrument_sv_zarr_combination(raw_sv_case, tmp_path):
-    """check combining calibrated sv from real raw files"""
+    """Check combining calibrated Sv from real raw files"""
     paths, sonar_model, xml_path, waveform_mode, encode_mode = raw_sv_case
 
     sv_datasets = []
